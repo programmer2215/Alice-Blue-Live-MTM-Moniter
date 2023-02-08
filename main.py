@@ -25,7 +25,12 @@ with open("telegram.txt") as f:
     bot_token = f.readline().strip()
 alice = ab.Aliceblue(user_id=user_id,api_key=api_key)
 
-print(alice.get_session_id())
+conn_ok = alice.get_session_id()
+if conn_ok['stat'] == 'Ok':
+    print('Connection Established Successfully')
+else:
+    print('Something went wrong')
+    print(conn_ok)
 
 def send_telegram_message(msg):
     if DEBUG:
@@ -82,15 +87,22 @@ def copy_security_rght_clck(e):
 def copy_row():
     cur_row = tree.focus()
     values = [str(value) for value in tree.item(cur_row)['values']]
-    string = ','.join(values)
+    string = '\t'.join(values)
     pyperclip.copy(string)
 
+def copy_all():
+    rows = tree.get_children()
+    date = datetime.now().strftime('%d/%m/%Y')
+    values = 'Date\tStock\tMTM\n'
+    values = values + '\n'.join(['\t'.join([date] + [str(value) for value in tree.item(i)['values']]) for i in rows])
+    pyperclip.copy(values)
 def my_popup(e):
     right_click_menu.tk_popup(e.x_root, e.y_root)
 
 right_click_menu = tk.Menu(tree, tearoff=False)
 right_click_menu.add_command(label="Copy Row", command=copy_row)
 right_click_menu.add_command(label="Copy Security", command=copy_security)
+right_click_menu.add_command(label="Copy All", command=copy_all)
 
 tree.bind("<Button-3>", my_popup)
 root.bind('<Control-c>', copy_security_rght_clck) 
